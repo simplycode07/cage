@@ -1,3 +1,3 @@
-## Mini Container
+## **C**-age (read as cage)
 
-Container runtime for linux implemented in C (just how god intended)
+Container runtime for linux implemented in C (just like god intended)
