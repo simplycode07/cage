@@ -23,10 +23,11 @@ static int child_func(void *arg) {
 	int status = execvp(cmd->path, cmd->args);
 	if (status == -1)
 		perror("could not execute command\n");
-	return 0;
+
+	return status;
 }
 
-int create_container(int args, Command cmd) {
+int create_container(Command cmd) {
 	printf("Container created!!\n");
 
 	char *stack;
@@ -39,23 +40,38 @@ int create_container(int args, Command cmd) {
 
 	stackTop = stack + STACK_SIZE;  /* Assume stack grows downward */
 
+	printf("parent pid: %d\n", getpid());
 	int pid = clone(child_func, stackTop, CLONE_NEWPID | SIGCHLD, &cmd);
 
 	if (pid == -1){
 		printf("pid failed\n");
+		munmap(stack, STACK_SIZE);
 		return -1;
 	}
-	
-	sleep(1);
 
-	printf("parent pid: %d\n", getpid());
+	int status;
 
-	if (waitpid(pid, NULL, 0) == -1) {
-		printf("exit failure of child process\n");
+	if (waitpid(pid, &status, 0) == -1) {
+		perror("waitpid");
+		munmap(stack, STACK_SIZE);
 		return -1;
 	}
-	printf("child terminated successfully\n");
-	
 
-	return 0;
+	printf("child terminated\n");
+
+	munmap(stack, STACK_SIZE);
+
+	if (WIFEXITED(status)) {
+		int exit_code = WEXITSTATUS(status);
+		// printf("child exited with: %d\n", exit_code);
+		return exit_code;
+	}
+
+	if (WIFSIGNALED(status)){
+		int exit_code = 128 + WTERMSIG(status);
+		// printf("child terminated with: %d\n", exit_code);
+		return exit_code;
+	}
+
+	return -1;
 }
