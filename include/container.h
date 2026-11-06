@@ -13,4 +13,4 @@ typedef struct {
 
 } Box;
 
-int create_container(int args, Command cmd);
+int create_container(Command cmd);
