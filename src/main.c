@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]) {
 	if (argc <= 1) {
-		printf("Usage: %s <child-hostname>\n", argv[0]);
+		printf("Usage: %s [options] [cmd]\n", argv[0]);
 	}
 
 	else {
@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i < argc - 2; i++) {
 				length_cmd += strlen(argv[i + 2]);
 			}
+
 			char *cmd = malloc(length_cmd * sizeof(char) + 1);
 			if (argc > 2) {
 				int counter = 0;
