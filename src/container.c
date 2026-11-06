@@ -7,19 +7,26 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include "../include/container.h"
 
+#ifndef STACK_SIZE
 #define STACK_SIZE (1024 * 1024)
 
+#endif
+
 static int child_func(void *arg) {
-
 	printf("child pid: %d\n", getpid());
+	Command *cmd = (Command *)arg;
 
-	sleep(5);
+	printf("cmd: %d, %s\n", cmd->argc, cmd->path);
 
+	int status = execvp(cmd->path, cmd->args);
+	if (status == -1)
+		perror("could not execute command\n");
 	return 0;
 }
 
-int create_container(int args, char *cmd) {
+int create_container(int args, Command cmd) {
 	printf("Container created!!\n");
 
 	char *stack;
@@ -32,7 +39,7 @@ int create_container(int args, char *cmd) {
 
 	stackTop = stack + STACK_SIZE;  /* Assume stack grows downward */
 
-	int pid = clone(child_func, stackTop, CLONE_NEWPID | SIGCHLD, cmd);
+	int pid = clone(child_func, stackTop, CLONE_NEWPID | SIGCHLD, &cmd);
 
 	if (pid == -1){
 		printf("pid failed\n");
