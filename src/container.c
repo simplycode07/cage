@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/utsname.h>
 #include <unistd.h>
 #include "../include/container.h"
 
@@ -15,7 +16,19 @@
 #endif
 
 static int child_func(void *arg) {
-	printf("child pid: %d\n", getpid());
+
+	if (sethostname("cage", 4) == -1) {
+		perror("could not set hostname");
+		return -1;
+	}
+
+	char name[256];
+	if (gethostname(name, 256) == -1) {
+		perror("could not get hostname");
+		return -1;
+	}
+
+	printf("child pid: %d, child hostanme: %s\n", getpid(), name);
 	Command *cmd = (Command *)arg;
 
 	printf("cmd: %d, %s\n", cmd->argc, cmd->path);
@@ -41,7 +54,7 @@ int create_container(Command cmd) {
 	stackTop = stack + STACK_SIZE;  /* Assume stack grows downward */
 
 	printf("parent pid: %d\n", getpid());
-	int pid = clone(child_func, stackTop, CLONE_NEWPID | SIGCHLD, &cmd);
+	int pid = clone(child_func, stackTop, CLONE_NEWPID | CLONE_NEWUTS | SIGCHLD, &cmd);
 
 	if (pid == -1){
 		printf("pid failed\n");
