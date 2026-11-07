@@ -103,8 +103,8 @@ cage/
 
 ## Roadmap
 
-- [ ] Improve process lifecycle management and exit-status propagation.
-- [ ] Add UTS namespace isolation.
+- [x] Improve process lifecycle management and exit-status propagation.
+- [x] Add UTS namespace isolation.
 - [ ] Add mount namespace isolation.
 - [ ] Implement filesystem isolation.
 - [ ] Integrate cgroups v2 for resource management.
